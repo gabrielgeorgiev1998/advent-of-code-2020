@@ -634,3 +634,5 @@ bbbabbbbabbabbababababbabbbaaaaaabaabbabbaabbabb"""
 
 
 [rules, strs] = map((lambda x: x.splitlines()), input_str.split("\n\n"))
+
+print(0)
