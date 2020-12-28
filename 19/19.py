@@ -632,7 +632,45 @@ baaaabbbabbabaaaaabbabbabaaaaaababbabbbaaaababaaababbaab
 bbbbbbabbbbaababbbaabbab
 bbbabbbbabbabbababababbabbbaaaaaabaabbabbaabbabb"""
 
+import re
+
+def create_rule_11(counter):
+  if(counter==0):
+    return ""
+  else:
+    return replace_with_rules("42", rules_dict) + "(" + create_rule_11(counter-1) + ")?" + replace_with_rules("31", rules_dict)
+
+def replace_with_rules(rule, rules_dict):
+  if rule == "8":
+    return "({})+".format(replace_with_rules("42", rules_dict))
+  elif rule == "11":
+    return "({})".format(create_rule_11(12))
+  if "\"" in rule:
+    return rule[1]
+  elif "|" in rule:
+    els = rule.split(" | ")
+    return "({}|{})".format(replace_with_rules(els[0], rules_dict), replace_with_rules(els[1], rules_dict))
+  elif " " in rule:
+    sep_rules = rule.split(" ")
+    return "(" + replace_with_rules(sep_rules[0], rules_dict) + replace_with_rules(sep_rules[1], rules_dict) + ")"
+  else:
+    return replace_with_rules(rules_dict[rule], rules_dict)
+
 
 [rules, strs] = map((lambda x: x.splitlines()), input_str.split("\n\n"))
 
-print(0)
+rules_dict = {el[0]:el[1] for el in map((lambda x: x.split(": ")), rules)}
+
+rules_dict["8"] = "42 | 42 8"
+rules_dict["11"] = "42 31 | 42 11 31"
+
+zero_string_pattern = "^{}$".format(replace_with_rules(rules_dict['0'], rules_dict))
+
+print(zero_string_pattern)
+
+count = 0
+for string in strs:
+  if len(re.findall(zero_string_pattern, string)) == 1:
+    count += 1
+
+print(count)
