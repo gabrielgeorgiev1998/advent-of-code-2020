@@ -1,70 +1,62 @@
 input_str = "853192647"
 
-import numpy as np
+class Node():
+  def __init__(self, value):
+    self.value = value
+    self.next = None
 
-def get_final_result(nums):
-  num1 = nums[int((np.where(nums==1)+1)[0])%len(nums)]  
-  num2 = nums[int((np.where(nums==1)+2)[0])%len(nums)]  
+value_to_node = {}
 
-  return num1*num2
+first_node = None
+prev_node = None
+for i in range(1, 1000001):
+  if i < 10:
+    value = int(input_str[i-1])
+    node = Node(value)
+    value_to_node[value] = node
+    if prev_node != None:
+      prev_node.next = node
+    prev_node = node
 
-
-def construct_full_start_state(string):
-  input_nums = list(map(int, input_str))
-
-  for i in range(10, 1000001):
-    input_nums.append(i)
-  
-  return np.array(input_nums)
-
-def get_removed_cups(nums, current_cup):
-  start_ind = (current_cup + 1)%len(nums)
-  end_ind = (current_cup + 4)%len(nums)
-
-  if start_ind > end_ind:
-    return np.concatenate(nums[start_ind:], nums[:end_ind])
+    if first_node == None:
+      first_node = node
   else:
-    return nums[start_ind:end_ind]
+    value = i
+    node = Node(value)
+    value_to_node[value] = node
+    prev_node.next = node
+    prev_node = node
 
-def remove_cups(nums, current_cup):
-  start_ind = (current_cup + 1)%len(nums)
-  end_ind = (current_cup + 4)%len(nums)
+node.next = first_node
 
-  if start_ind > end_ind:
-    return nums[end_ind:start_ind]
-  else:
-    return np.concatenate((nums[:start_ind], nums[end_ind:]))
+curr_node = first_node
 
-def get_destination_cup(nums, current_cup):
-  dest_cup = nums[current_cup] - 1
-  if dest_cup == 0:
-    dest_cup = 1000000
+for i in range(10000000):
+  curr_cup = curr_node.value
 
+  removed = curr_node.next
+
+  removed_values = [removed.value, removed.next.value, removed.next.next.value]
+
+  curr_node.next = removed.next.next.next
+
+  dest_cup = curr_cup - 1
   while 1:
-    if dest_cup in nums:
-      return int(np.where(nums==dest_cup)[0])
-    dest_cup -= 1
     if dest_cup == 0:
       dest_cup = 1000000
+    if dest_cup in removed_values:
+      dest_cup -= 1
+      continue
+    break
 
-def add_removed_cups(nums, removed, destination_cup):
-  return np.concatenate((nums[:destination_cup+1], removed, nums[destination_cup+1:]))
+  dest_node = value_to_node[dest_cup]
 
+  dest_next = dest_node.next
+  dest_node.next = removed
+  removed.next.next.next = dest_next
 
-nums = construct_full_start_state(input_str)
-current_cup = 0
-current_cup_label = nums[current_cup]
-for i in range(10000000):
-  removed_cups = get_removed_cups(nums, current_cup)
+  curr_node = curr_node.next
 
-  cups_after_removal = remove_cups(nums, current_cup)
+cup_1 = value_to_node[1]
 
-  destination_cup = get_destination_cup(cups_after_removal, current_cup)
-
-  nums = add_removed_cups(cups_after_removal, removed_cups, destination_cup)
-  
-  current_cup = (int(np.where(nums==current_cup_label)[0]) + 1)%len(nums)
-  current_cup_label = nums[current_cup]
-
-
-get_final_result(nums)
+print(cup_1.next.value * cup_1.next.next.value)
